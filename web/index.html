@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#070a0f" />
+  <meta name="description" content="Apex Arena — every live sport on one grid." />
+  <title>Apex Arena — Live Sports, One Grid</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&family=Oswald:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <div class="noise" aria-hidden="true"></div>
+  <div class="cursor-dot" aria-hidden="true"></div>
+  <div class="cursor-ring" aria-hidden="true"><span></span></div>
+  <div id="preloader" class="preloader" aria-label="Loading Apex Arena">
+    <div class="preloader__mark">APEX<span>ARENA</span></div>
+    <div class="preloader__bottom"><span>GRID INITIALIZING</span><strong id="loader-count">000</strong></div>
+    <div class="preloader__line"><i></i></div>
+  </div>
+
+  <div class="event-ticker" role="status" aria-live="polite">
+    <span class="event-ticker__tag">LIVE</span>
+    <div class="event-ticker__viewport"><div id="event-ticker-content" class="event-ticker__content"><span>Synchronizing live state…</span></div></div>
+    <time id="utc-clock">20:14:32 UTC</time>
+  </div>
+
+  <header class="nav">
+    <a class="brand magnetic" href="#home" aria-label="Apex Arena home"><span>▲</span>APEX <em>ARENA</em></a>
+    <nav aria-label="Primary navigation">
+      <button class="nav-link active" data-view="home">HOME</button>
+      <button class="nav-link" data-view="arena">ARENA</button>
+      <button class="nav-link" data-scroll="data-center">DATA</button>
+      <button class="nav-link" data-scroll="live">LIVE</button>
+      <button class="nav-link" data-scroll="predict">PREDICT</button>
+    </nav>
+    <div class="nav-actions">
+      <button id="search-btn" class="icon-btn magnetic" aria-label="Open search"><span>⌕</span><small>⌘ K</small></button>
+      <button id="sound-btn" class="icon-btn magnetic" aria-label="Toggle sound">◖</button>
+      <div class="avatar">AP</div>
+    </div>
+  </header>
+
+  <main id="home-view">
+    <section id="home" class="hero">
+      <canvas id="speed-canvas" aria-hidden="true"></canvas>
+      <div class="hero__eyebrow reveal"><span class="live-dot"></span> LIVE PROVIDERS CONNECTED <i></i> OPENF1 + FOOTBALL</div>
+      <div class="hero__copy">
+        <h1 aria-label="Every sport. One grid."><span>EVERY SPORT.</span><span class="outline">ONE GRID.</span></h1>
+        <div class="hero__meta reveal">
+          <p>One command center for every live moment.<br />Track. Compare. Predict. Never miss the shift.</p>
+          <div class="hero-actions"><button class="cta magnetic" data-football-hub>OPEN FOOTBALL HUB <span>↘</span></button><button class="ghost-cta magnetic" data-view="arena">ENTER ARENA ↗</button></div>
+        </div>
+      </div>
+      <div class="hero__race-line" aria-hidden="true"><span>01</span><i></i><span>06</span></div>
+      <div class="hero__scroll">SCROLL TO GRID <span>↓</span></div>
+    </section>
+
+    <section id="live" class="live-section section-pad">
+      <div class="section-head reveal">
+        <div><span class="kicker">THE GRID / MULTI-SPORT SIGNALS</span><h2>YOU'RE IN<br /><em>THE ACTION.</em></h2></div>
+        <div class="sport-filters" role="group" aria-label="Filter sports">
+          <button class="filter active" data-sport="ALL">ALL <span>18</span></button>
+          <button class="filter" data-sport="F1">F1 <span>1</span></button>
+          <button class="filter" data-sport="NBA">NBA <span>4</span></button>
+          <button class="filter" data-sport="SOCCER">FOOTBALL <span>6</span></button>
+          <button class="filter" data-sport="CRICKET">CRICKET <span>3</span></button>
+          <button class="filter" data-sport="NHL">NHL <span>2</span></button>
+          <button class="filter" data-sport="VOLLEYBALL">VOLLEY <span>2</span></button>
+        </div>
+      </div>
+      <div id="match-grid" class="match-grid"></div>
+      <button id="load-more" class="text-btn magnetic">VIEW ALL LIVE EVENTS <span>↗</span></button>
+    </section>
+
+    <section id="data-center" class="data-center section-pad">
+      <div class="data-center__head reveal">
+        <div><span class="kicker">REAL DATA / EDGE AGGREGATOR</span><h2>LIVE SIGNAL<br /><em>CENTER.</em></h2></div>
+        <div class="provider-status"><i></i><span id="backend-status">CONNECTING TO BACKEND</span><small id="last-refresh">—</small></div>
+      </div>
+      <div class="data-tabs" role="tablist" aria-label="Live provider data">
+        <button class="data-tab" data-feed="f1" role="tab">F1 GRID <span id="f1-count">—</span></button>
+        <button class="data-tab active" data-feed="today" role="tab">FOOTBALL TODAY <span id="today-count">—</span></button>
+        <button class="data-tab" data-feed="yesterday" role="tab">YESTERDAY <span id="yesterday-count">—</span></button>
+      </div>
+      <div class="feed-shell">
+        <div id="feed-meta" class="feed-meta"><span>LOADING PROVIDER DATA</span><b>PLEASE WAIT</b></div>
+        <div id="live-feed" class="live-feed" aria-live="polite"><div class="feed-loading"><i></i><i></i><i></i></div></div>
+      </div>
+    </section>
+
+    <section class="manifesto section-pad">
+      <div class="manifesto__rail"><span>LIVE</span><i></i><span>ANALYZE</span><i></i><span>PREDICT</span></div>
+      <div class="manifesto__grid">
+        <div class="giant-stack reveal"><span>SEE THE</span><span class="outline">MOMENT</span><span>BEFORE IT</span><span class="orange">HAPPENS.</span></div>
+        <div class="signal-orbit reveal" aria-hidden="true">
+          <div class="orbit o1"></div><div class="orbit o2"></div><div class="orbit o3"></div>
+          <div class="orbit-center"><b id="signal-value">87</b><span>WIN %</span></div>
+          <span class="orbit-label ol1">FORM</span><span class="orbit-label ol2">PACE</span><span class="orbit-label ol3">MOMENTUM</span>
+        </div>
+      </div>
+      <div class="manifesto__footer reveal">
+        <span>01 — LIVE</span>
+        <p>A single signal layer for six sports. Instant updates, telemetry and context—not just scores.</p>
+        <span class="page-count">01 / 03</span>
+      </div>
+    </section>
+
+    <section id="predict" class="prediction section-pad">
+      <div class="prediction__intro reveal">
+        <span class="kicker">PREDICTION HUB / LIVE MODEL</span>
+        <h2>CALL IT<br /><em>BEFORE IT LANDS.</em></h2>
+        <p>Back your read. Build your streak. Climb the global grid.</p>
+      </div>
+      <div class="prediction-card tilt" data-cursor="PICK">
+        <div class="prediction-card__head"><div><span class="live-dot"></span> LIVE PREDICTION</div><span>NBA · Q4 02:41</span></div>
+        <div class="prediction-card__teams"><div><span class="team-logo gold">LAL</span><strong>LOS ANGELES</strong><b id="pred-score-a">106</b></div><span>VS</span><div><span class="team-logo green">BOS</span><strong>BOSTON</strong><b id="pred-score-b">104</b></div></div>
+        <div class="prediction-card__question">WHO WINS FROM HERE?<span>MODEL CONFIDENCE 74%</span></div>
+        <div class="probability"><button class="pick selected" data-team="LAL"><span>LA LAKERS</span><b>54%</b><i style="--p:54%"></i></button><button class="pick" data-team="BOS"><span>BOSTON</span><b>46%</b><i style="--p:46%"></i></button></div>
+        <button id="lock-pick" class="cta full magnetic">LOCK PREDICTION <span>+250 PTS</span></button>
+      </div>
+    </section>
+  </main>
+
+  <main id="arena-view" class="arena-view hidden">
+    <section class="arena-hero">
+      <div class="arena-title"><div><span class="kicker">MULTI-SCREEN / YOUR GRID</span><h1>THE <span>ARENA</span></h1></div><p>Four live signals. One decisive view.</p></div>
+      <div class="arena-controls"><span id="stream-status"><i></i> CONNECTING</span><div class="layout-options" aria-label="Arena layouts"><button class="small-btn active" data-layout="2x2">2×2</button><button class="small-btn" data-layout="1x2">1×2</button><button class="small-btn" data-layout="focus">1+2 FOCUS</button></div><button id="clear-btn" class="small-btn danger">CLEAR</button></div>
+      <div id="arena-grid" class="arena-grid layout-2x2"><div class="arena-skeleton"><i></i><i></i><i></i><i></i></div></div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="brand"><span>▲</span>APEX <em>ARENA</em></div><p>EVERY SPORT. ONE GRID.</p><div><span>BACKEND: ONLINE</span><b></b></div>
+  </footer>
+
+  <nav class="mobile-nav" aria-label="Mobile navigation"><button data-view="home" class="active">⌂<span>HOME</span></button><button data-scroll="live">●<span>LIVE</span></button><button data-view="arena">▦<span>ARENA</span></button><button data-scroll="predict">◇<span>PICKS</span></button></nav>
+
+  <dialog id="command-palette" class="command-palette">
+    <form method="dialog"><div class="search-box"><span>⌕</span><input id="command-input" autocomplete="off" placeholder="Search driver, team or event…" /><kbd>ESC</kbd></div><div class="command-hint">QUICK JUMP</div><div id="command-results"></div></form>
+  </dialog>
+  <dialog id="match-detail" class="match-detail">
+    <div class="detail-shell">
+      <button id="detail-close" class="detail-close" aria-label="Close match details">×</button>
+      <div id="detail-content"><div class="detail-loading">LOADING PLAYER DATA…</div></div>
+    </div>
+  </dialog>
+  <dialog id="event-picker" class="event-picker">
+    <div class="picker-shell">
+      <div class="picker-head"><div><span class="kicker">LIVE STATE / EVENT DIRECTORY</span><h3>ADD TO ARENA</h3></div><button id="picker-close" aria-label="Close event picker">×</button></div>
+      <div class="picker-tools"><input id="picker-search" type="search" placeholder="Search team, driver, league…" aria-label="Search events"><div id="picker-sports" class="picker-sports"></div><label><input id="picker-live-only" type="checkbox" checked> LIVE ONLY</label></div>
+      <div id="picker-results" class="picker-results"></div>
+    </div>
+  </dialog>
+  <div id="toast" class="toast" role="status"></div>
+  <script src="./app.js"></script>
+</body>
+</html>
