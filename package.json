@@ -4,6 +4,7 @@
   "type": "module",
   "scripts": {
     "build": "node scripts/build.mjs",
+    "build:vercel": "node scripts/build-vercel.mjs",
     "validate": "node scripts/validate-artifact.mjs",
     "dev": "node scripts/dev-server.mjs"
   }
