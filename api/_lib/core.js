@@ -318,6 +318,60 @@ async function getArenaEvents(date) {
     },
   };
 }
+function normalizeCricinfo(m) {
+  const teams = (m.teams || []).map((t) => ({
+    name: t.team?.longName || t.team?.name || "Team",
+    short: t.team?.abbreviation || String(t.team?.name || "TBD").slice(0, 3).toUpperCase(),
+    score: t.score || null,
+    overs: t.scoreInfo || null,
+    isHome: Boolean(t.isHome),
+  }));
+  const stage = String(m.stage || m.state || "").toUpperCase();
+  return {
+    id: String(m.objectId || m.id || ""),
+    series: m.series?.longName || m.series?.name || "",
+    title: m.title || "",
+    format: m.format || "",
+    venue: m.ground?.name || "",
+    startTime: m.startTime || null,
+    status: ["RUNNING", "LIVE"].includes(stage) ? "LIVE" : stage === "FINISHED" ? "FINISHED" : "UPCOMING",
+    statusText: m.statusText || m.status || "",
+    teams,
+    provider: "ESPNcricinfo",
+  };
+}
+
+async function getCricket(query = "") {
+  const terms = query.toLowerCase().split(",").map((t) => t.trim()).filter(Boolean);
+  let matches = [];
+  let provider = "ESPNcricinfo";
+  try {
+    const data = await getJSON("https://hs-consumer-api.espncricinfo.com/v1/pages/matches/current?lang=en&latest=true");
+    matches = (data.matches || []).map(normalizeCricinfo);
+  } catch {
+    provider = "TheSportsDB";
+    const date = new Date().toISOString().slice(0, 10);
+    const data = await getJSON(`https://www.thesportsdb.com/api/v1/json/123/eventsday.php?d=${date}&s=Cricket`).catch(() => ({ events: [] }));
+    matches = (data.events || []).map((e) => {
+      const n = normalizeArenaSportsDb(e, "CRICKET");
+      return { id: n.id, series: e.strLeague || "", title: n.title, format: "", venue: e.strVenue || "", startTime: n.startTime, status: n.status, statusText: n.meta, teams: [{ name: n.homeName, short: n.home, score: n.hs === "—" ? null : String(n.hs), overs: null }, { name: n.awayName, short: n.away, score: n.as === "—" ? null : String(n.as), overs: null }], provider };
+    });
+  }
+  if (terms.length) {
+    matches = matches.filter((m) => {
+      const hay = `${m.title} ${m.teams.map((t) => `${t.name} ${t.short}`).join(" ")}`.toLowerCase();
+      return terms.every((t) => hay.includes(t));
+    });
+  }
+  return {
+    provider,
+    fetchedAt: new Date().toISOString(),
+    query,
+    live: matches.filter((m) => m.status === "LIVE"),
+    upcoming: matches.filter((m) => m.status === "UPCOMING"),
+    history: matches.filter((m) => m.status === "FINISHED"),
+  };
+}
 
 export async function api(request, url) {
   try {
@@ -350,6 +404,7 @@ export async function api(request, url) {
       }
       return json({ error: "Method not allowed" }, 405, 0);
     }
+    if (url.pathname === "/api/cricket") return json(await getCricket(url.searchParams.get("q") || ""), 200, 15);
     if (url.pathname === "/api/health") return json({
       ok: true,
       service: "apex-arena-aggregator",
